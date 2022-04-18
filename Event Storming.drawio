@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-04-18T15:04:04.091Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36" etag="ujDVzPS6Ti3jmcyyb9Zo" version="17.4.5" type="github">
+<mxfile host="app.diagrams.net" modified="2022-04-18T15:19:21.797Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36" etag="9SiTDMIDnZ09o6iFg3nY" version="17.4.5" type="github">
   <diagram id="02kSQJC5EBc3TXm7iyLK" name="Page-1">
     <mxGraphModel dx="3006" dy="1344" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -25,7 +25,7 @@
         <mxCell id="L5pj8UpumzNdaHFX_pkL-9" value="客户额度已注册" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="370" y="950" width="100" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="L5pj8UpumzNdaHFX_pkL-10" value="注册客户额度账户" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
+        <mxCell id="L5pj8UpumzNdaHFX_pkL-10" value="注册客户额度" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="250" y="950" width="100" height="100" as="geometry" />
         </mxCell>
         <mxCell id="L5pj8UpumzNdaHFX_pkL-12" value="产品额度已注册" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
@@ -142,9 +142,6 @@
         <mxCell id="L5pj8UpumzNdaHFX_pkL-67" value="客户额度" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#008a00;strokeColor=#005700;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="730" y="290" width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="L5pj8UpumzNdaHFX_pkL-68" value="额度授信" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="160" y="330" width="80" height="80" as="geometry" />
-        </mxCell>
         <mxCell id="L5pj8UpumzNdaHFX_pkL-69" value="产品额度" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#008a00;strokeColor=#005700;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="1037.5" y="280" width="80" height="80" as="geometry" />
         </mxCell>
@@ -204,6 +201,9 @@
         </mxCell>
         <mxCell id="L5pj8UpumzNdaHFX_pkL-91" value="产品额度信息" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#008a00;strokeColor=#005700;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
           <mxGeometry x="1160" y="850" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="L5pj8UpumzNdaHFX_pkL-92" value="新产品申请" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;glass=1;sketch=0;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="-270" y="320" width="80" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
