@@ -4,8 +4,8 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="Gt8K0VjSj40tpMnUnVSi-1" value="" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.user;fontColor=light-dark(#ffffff, #ededed);fontFamily=Times New Roman;" vertex="1" parent="1">
-          <mxGeometry x="80" y="620" width="47.5" height="50" as="geometry" />
+        <mxCell id="Gt8K0VjSj40tpMnUnVSi-1" value="&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;User&lt;/font&gt;" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.user;fontColor=light-dark(#ffffff, #ededed);fontFamily=Times New Roman;" vertex="1" parent="1">
+          <mxGeometry x="20" y="610" width="47.5" height="50" as="geometry" />
         </mxCell>
         <mxCell id="Gt8K0VjSj40tpMnUnVSi-2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=light-dark(#ffffff, #ededed);strokeColor=#2D7600;fontFamily=Times New Roman;glass=0;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="180" y="565" width="310" height="165" as="geometry" />
