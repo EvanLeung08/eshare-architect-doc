@@ -1,0 +1,43 @@
+%%{init: {'theme': 'neutral', 'themeVariables': { 'primaryColor': '#F0F7FF', 'clusterBkg': '#E3F2FD'}}}%%
+flowchart TD
+    classDef user fill:#C8E6C9,stroke:#2E7D32;
+    classDef ai fill:#B3E5FC,stroke:#0288D1;
+    classDef system fill:#FFF9C4,stroke:#F57F17;
+    classDef security fill:#FFCDD2,stroke:#C62828;
+    classDef data fill:#C5CAE9,stroke:#303F9F;
+
+    User[["Technical User<br/>(Natural Language Interface)"]]:::user
+    Production[["Production Systems<br/>(Real-time Monitoring)"]]:::system
+
+    subgraph AI_Platform["AI Support Automation Platform"]
+        direction TB
+        AI_Dashboard["Smart Dashboard<br/>- NLP Query<br/>- Incident Tracking<br/>- Analytics"]:::system
+        AI_Brain["AI Decision Core<br/>- GPT-4 Analysis<br/>- Auto-Remediation<br/>- Knowledge Base"]:::ai
+        Auto_Heal["Self-Healing Engine<br/>- Prebuilt Solutions<br/>- Toolchain Integration<br/>- Safety Checks"]:::system
+        Data_Vault["Knowledge Nexus<br/>- Incident Database<br/>- Solution Library<br/>- Learning System"]:::data
+    end
+
+    Security_Layer["Security Shield<br/>- Enterprise Encryption<br/>- RBAC<br/>- Audit Trail"]:::security
+
+    User -->|1. Ask Questions<br/>'Show recent failures'| AI_Dashboard
+    Production -->|2. Real-time Alerts| AI_Brain
+    AI_Brain -->|3a. Instant Fixes| Auto_Heal
+    AI_Brain -->|3b. Insights Report| AI_Dashboard
+    Auto_Heal -->|4. Result Feedback| Data_Vault
+    AI_Dashboard -->|5. Human Oversight| User
+    Data_Vault -->|6. Continuous Learning| AI_Brain
+
+    Security_Layer --- AI_Platform
+    Security_Layer -.->|Data Protection| Data_Vault
+    Security_Layer -.->|Access Control| AI_Dashboard
+    Security_Layer -.->|API Security| Auto_Heal
+
+    click AI_Brain "https://openai.com/gpt-4" _blank
+    click Auto_Heal "https://spring.io/projects/spring-ai" _blank
+
+    subgraph Key_Metrics["Business Outcomes"]
+        direction LR
+        MTTR(["▼ 70% MTTR Reduction"]):::system
+        Cost(["▼ 55% OpEx Savings"]):::data
+        SLA(["▲ 99.9% SLA Compliance"]):::ai
+    end

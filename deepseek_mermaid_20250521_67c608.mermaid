@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant P as Production
+    participant A as AI Core
+    participant H as Auto-Heal
+    participant U as User
+    
+    P->>A: 🚨 High CPU Alert
+    A->>A: 🔍 Root Cause Analysis
+    alt Auto-Fix
+        A->>H: 🛠️ Execute Scaling
+        H->>P: ✅ Normalization
+    else Human Needed
+        A->>U: 📄 Diagnostic Report
+        U->>A: ✔️ Confirm Action
+    end

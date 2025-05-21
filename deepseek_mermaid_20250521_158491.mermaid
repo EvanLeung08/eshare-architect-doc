@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant User
+    participant Dashboard
+    participant AI_Core
+    participant Systems
+    
+    User->>Dashboard: Query: "Show failed transactions"
+    Dashboard->>AI_Core: Analyze request
+    AI_Core->>Systems: Retrieve live data
+    Systems-->>AI_Core: Return metrics
+    AI_Core->>AI_Core: GPT-4 processing
+    alt Automatic fix
+        AI_Core->>Systems: Execute remediation
+        Systems-->>User: System stabilized
+    else Manual intervention
+        AI_Core->>Dashboard: Generate report
+        Dashboard-->>User: Recommend action
+    end
