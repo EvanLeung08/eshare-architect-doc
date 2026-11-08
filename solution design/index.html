@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="High-level solution architecture for HSBC Data Fabric Channel Adapters: multi-product SQL extraction, reliable NAS file publication, AIP routing, retries, and exception handling.">
+  <title>HSBC Data Fabric Channel Adapters | High-Level Solution Architecture</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2311192d'/%3E%3Cpath d='M13 32 27 18v28Zm19 0 14-14v28Z' fill='%23db0011'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Back to architecture overview">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+      <span class="brand-copy"><strong>Integration Platform</strong><small>Solution Architecture</small></span>
+    </a>
+    <div class="topbar-meta">
+      <span class="doc-tag">HLD · V1.0</span>
+      <span class="doc-date">06 NOV 2026</span>
+      <a class="offline-download" href="./HSBC-Data-Fabric-Architecture-Offline.html" download="HSBC-Data-Fabric-Architecture-Offline.html" aria-label="Download single-file offline HTML" title="Download single-file offline HTML">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg><span>Offline HTML</span>
+      </a>
+      <button class="icon-button print-button" id="printButton" type="button" aria-label="Print or save as PDF" title="Print or save as PDF">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <p class="eyebrow">DATA INTEGRATION <span>/</span> HIGH-LEVEL DESIGN</p>
+        <h1 id="pageTitle">HSBC Data Fabric<br><span>Channel Adapters</span></h1>
+        <p class="hero-description">A configurable extraction layer for multiple Data Products, unifying API, JDBC, and Arrow Flight. Files are reliably published to a local NAS, then distributed by AIP Core to one or multiple consumers using its routing configuration.</p>
+        <div class="hero-tags" aria-label="Architecture capabilities">
+          <span>SQL-driven extraction</span><span>Atomic file publish</span><span>Config-driven 1:N routing</span>
+        </div>
+      </div>
+
+      <div class="simulation-panel" aria-label="Flow simulation controls">
+        <div class="simulation-heading">
+          <div><span class="live-dot" id="liveDot"></span><strong>FLOW SIMULATOR</strong></div>
+          <span id="runStateLabel">RUNNING</span>
+        </div>
+        <div class="scenario-switch" role="group" aria-label="Select a simulation scenario">
+          <button type="button" class="scenario-button active" data-scenario="normal" aria-pressed="true">Normal Flow</button>
+          <button type="button" class="scenario-button" data-scenario="transient" aria-pressed="false">Transient Fault</button>
+          <button type="button" class="scenario-button" data-scenario="permanent" aria-pressed="false">Permanent Fault</button>
+        </div>
+        <div class="playback-controls">
+          <button type="button" class="primary-control" id="playButton" aria-label="Pause flow">
+            <svg id="pauseIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+            <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 11 7-11 7Z"/></svg>
+            <span id="playLabel">Pause</span>
+          </button>
+          <button type="button" class="secondary-control" id="restartButton">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 9A7 7 0 1 1 5 15"/></svg>Rerun
+          </button>
+          <button type="button" class="speed-control" id="speedButton" aria-label="Change playback speed">1×</button>
+        </div>
+        <p class="simulation-hint" id="scenarioHint">End-to-end flow: extraction, validation, atomic file publication, and 1:N delivery.</p>
+      </div>
+    </section>
+
+    <section class="architecture" id="architecture" aria-labelledby="architectureTitle">
+      <div class="section-heading">
+        <div>
+          <p class="section-index">01 / END-TO-END ARCHITECTURE</p>
+          <h2 id="architectureTitle">End-to-End Data Flow & Reliability Control Plane</h2>
+        </div>
+        <div class="legend" aria-label="Legend">
+          <span><i class="legend-packet"></i>Data flow</span>
+          <span><i class="legend-retry"></i>Error & retry</span>
+          <span><i class="legend-control"></i>Control & audit</span>
+        </div>
+      </div>
+
+      <div class="architecture-canvas" id="diagram">
+        <svg class="connections" id="flowSvg" aria-hidden="true">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-fill"/></marker>
+            <marker id="arrowActive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-active-fill"/></marker>
+            <marker id="arrowError" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="arrow-error-fill"/></marker>
+          </defs>
+          <g class="base-paths">
+            <path id="path-source-adapter" class="flow-path main-path" marker-end="url(#arrow)"/>
+            <path id="path-adapter-landing" class="flow-path main-path" marker-end="url(#arrow)"/>
+            <path id="path-landing-core" class="flow-path main-path" marker-end="url(#arrow)"/>
+            <path id="path-core-consumer-0" class="flow-path branch-path" marker-end="url(#arrow)"/>
+            <path id="path-core-consumer-1" class="flow-path branch-path" marker-end="url(#arrow)"/>
+            <path id="path-core-consumer-2" class="flow-path branch-path" marker-end="url(#arrow)"/>
+            <path id="path-adapter-error" class="flow-path error-path" marker-end="url(#arrowError)"/>
+            <path id="path-error-retry" class="flow-path error-path" marker-end="url(#arrowError)"/>
+            <path id="path-retry-adapter" class="flow-path error-path" marker-end="url(#arrowError)"/>
+            <path id="path-error-dlq" class="flow-path error-path" marker-end="url(#arrowError)"/>
+          </g>
+          <g id="packetLayer"></g>
+        </svg>
+
+        <div class="diagram-main">
+          <article class="architecture-node source-node" id="sourceNode" data-node="source">
+            <div class="node-topline"><span>01 / EXTERNAL SOURCE</span><span class="node-status" id="sourceStatus">READY</span></div>
+            <div class="node-title">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="7" rx="10" ry="4"/><path d="M6 7v9c0 2.2 4.5 4 10 4s10-1.8 10-4V7M6 16v9c0 2.2 4.5 4 10 4s10-1.8 10-4v-9"/></svg>
+              <div><h3>HSBC Data Fabric</h3><p>SQL-based data access</p></div>
+            </div>
+            <div class="node-label">DATA PRODUCTS <span>Select to configure</span></div>
+            <div class="product-list" role="group" aria-label="Select a Data Product">
+              <button type="button" class="product-button active" data-product="customer" aria-pressed="true"><span><i></i>DP-CUST-360</span><small>Customer 360</small></button>
+              <button type="button" class="product-button" data-product="payments" aria-pressed="false"><span><i></i>DP-PAYMENTS</span><small>Payments</small></button>
+              <button type="button" class="product-button" data-product="finance" aria-pressed="false"><span><i></i>DP-FINANCE</span><small>Finance Ledger</small></button>
+            </div>
+            <div class="sql-block">
+              <div><span>LOGICAL SQL EXAMPLE</span><span id="sqlChannelLabel">API</span></div>
+              <code id="sqlPreview">SELECT * FROM customer_360_v2<br>WHERE updated_at &gt; :watermark</code>
+            </div>
+          </article>
+
+          <article class="architecture-node adapter-node" id="adapterNode" data-node="adapter">
+            <div class="node-topline"><span>02 / INTEGRATION PLATFORM</span><span class="node-status" id="adapterStatus">IDLE</span></div>
+            <div class="node-title">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 10h9v9H5zM18 13h9M23 8l5 5-5 5M14 22H5M9 17l-5 5 5 5M18 23h9v5h-9z"/></svg>
+              <div><h3>Data Fabric<br>Channel Adapters</h3><p>Configurable extraction services</p></div>
+            </div>
+            <div class="channel-selector" role="group" aria-label="Select an access channel">
+              <button type="button" class="channel-button active" data-channel="API" aria-pressed="true"><strong>API</strong><small>Paged result</small></button>
+              <button type="button" class="channel-button" data-channel="JDBC" aria-pressed="false"><strong>JDBC</strong><small>Cursor / batch</small></button>
+              <button type="button" class="channel-button" data-channel="Arrow Flight" aria-pressed="false"><strong>Arrow Flight</strong><small>Columnar stream</small></button>
+            </div>
+            <div class="adapter-stages">
+              <div class="adapter-stage" id="stage-config"><span class="stage-index">A</span><div><strong>Config & Orchestration</strong><small>SQL template · schedule · watermark</small></div><span class="stage-state">READY</span></div>
+              <div class="adapter-stage" id="stage-extract"><span class="stage-index">B</span><div><strong>Query & Extract</strong><small>Timeout · pagination / stream chunks</small></div><span class="stage-state">WAIT</span></div>
+              <div class="adapter-stage" id="stage-transform"><span class="stage-index">C</span><div><strong>Transform & Validate</strong><small>Schema · data quality · serialization</small></div><span class="stage-state">WAIT</span></div>
+              <div class="adapter-stage" id="stage-publish"><span class="stage-index">D</span><div><strong>File Generate & Commit</strong><small>Parquet / CSV + manifest + checksum</small></div><span class="stage-state">WAIT</span></div>
+            </div>
+          </article>
+
+          <article class="architecture-node landing-node" id="landingNode" data-node="landing">
+            <div class="node-topline"><span>03 / LOCAL NAS</span><span class="node-status" id="landingStatus">WAITING</span></div>
+            <div class="node-title">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 10h9l3 4h12v14H4zM4 10V6h9l3 4M9 21h14M9 25h9"/></svg>
+              <div><h3>AIP File<br>Landing Area</h3><p>Product-isolated folders</p></div>
+            </div>
+            <div class="folder-tree" aria-label="Example landing folder structure">
+              <div class="folder-root"><span>/landing/</span><small>NAS</small></div>
+              <div class="folder-product"><span id="folderProduct">customer_360/</span></div>
+              <div class="folder-date">2026/11/06/</div>
+              <div class="folder-file temp-file" id="tempFile"><i></i><span id="tempFileName">.data_001.parquet.tmp</span><small>TEMP</small></div>
+              <div class="folder-file final-file" id="finalFile"><i></i><span id="finalFileName">data_001.parquet</span><small>DATA</small></div>
+              <div class="folder-file success-file" id="successFile"><i></i><span>_SUCCESS</span><small>COMMIT</small></div>
+            </div>
+            <div class="integrity-note"><strong>Complete files only</strong><span>.tmp write → checksum → atomic rename → _SUCCESS</span></div>
+          </article>
+
+          <article class="architecture-node core-node" id="coreNode" data-node="core">
+            <div class="node-topline"><span>04 / INTERNAL PLATFORM</span><span class="node-status" id="coreStatus">POLLING</span></div>
+            <div class="node-title">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 5 9v14l11 6 11-6V9ZM5 9l11 6 11-6M16 15v14M10 12l11-6"/></svg>
+              <div><h3>AIP Core</h3><p>Existing routing capability</p></div>
+            </div>
+            <div class="core-flow">
+              <div id="corePoller"><span>1</span><div><strong>File Poll</strong><small>Detect product folder + _SUCCESS</small></div></div>
+              <div id="coreProcess"><span>2</span><div><strong>File Process Engine</strong><small>Validate, parse & prepare file delivery</small></div></div>
+              <div id="coreRouter"><span>3</span><div><strong>File Routing Service</strong><small>Resolve routing config & consumer list</small></div></div>
+              <div id="coreDispatcher"><span>4</span><div><strong>Channel Consumer Adapters</strong><small>SFTP · GCP · SMB · Email · etc.</small></div></div>
+            </div>
+            <div class="route-preview"><span>ROUTE MATCH</span><strong id="routePreview">DP-CUST-360 → CRM + Risk</strong></div>
+          </article>
+
+          <article class="architecture-node consumers-node" id="consumersNode" data-node="consumers">
+            <div class="node-topline"><span>05 / DOWNSTREAM</span><span class="node-status" id="consumerStatus">0 / 3</span></div>
+            <div class="node-title">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="7" cy="16" r="3"/><circle cx="25" cy="6" r="3"/><circle cx="25" cy="16" r="3"/><circle cx="25" cy="26" r="3"/><path d="m10 15 12-8M10 16h12M10 17l12 8"/></svg>
+              <div><h3>Data<br>Consumers</h3><p>One or multiple targets</p></div>
+            </div>
+            <div class="consumer-list">
+              <div class="consumer-item routed" id="consumer-0"><span class="consumer-letter">A</span><div><strong>CRM Analytics</strong><small>Customer domain</small></div><i></i></div>
+              <div class="consumer-item routed" id="consumer-1"><span class="consumer-letter">B</span><div><strong>Risk Platform</strong><small>Risk & compliance</small></div><i></i></div>
+              <div class="consumer-item" id="consumer-2"><span class="consumer-letter">C</span><div><strong>Regulatory Reporting</strong><small>Finance domain</small></div><i></i></div>
+            </div>
+            <p class="consumer-note">Each consumer acknowledges independently; one failed target does not block other routes.</p>
+          </article>
+        </div>
+
+        <div class="reliability-layer">
+          <div class="reliability-heading">
+            <div><span class="control-line"></span><h3>Reliability & Operations Control Plane</h3></div>
+            <p>Cross-cutting for every Data Product and channel · Correlation ID across the end-to-end flow</p>
+          </div>
+          <div class="reliability-grid">
+            <section class="reliability-module" id="retryModule">
+              <div class="module-title"><span>R1</span><h4>Retry & Backoff</h4><i id="retryIndicator"></i></div>
+              <p>Exponential backoff with jitter, plus channel-specific timeouts and attempt limits.</p>
+              <div class="module-meta"><span>Exponential backoff</span><strong id="retryCount">0 / 3 attempts</strong></div>
+            </section>
+            <section class="reliability-module" id="errorModule">
+              <div class="module-title"><span>E1</span><h4>Error Classification</h4><i id="errorIndicator"></i></div>
+              <p>Classify transient, permanent, and data-quality failures to determine retries and alert severity.</p>
+              <div class="error-types"><span>TRANSIENT</span><span>PERMANENT</span><span>DATA</span></div>
+            </section>
+            <section class="reliability-module" id="dlqModule">
+              <div class="module-title"><span>X1</span><h4>DLQ & Quarantine</h4><i id="dlqIndicator"></i></div>
+              <p>Preserve SQL, Run ID, and error context; quarantine invalid files and enable manual replay.</p>
+              <div class="module-meta"><span>Ops alert + replay</span><strong id="dlqStatus">STANDBY</strong></div>
+            </section>
+            <section class="reliability-module" id="stateModule">
+              <div class="module-title"><span>S1</span><h4>State & Idempotency</h4><i></i></div>
+              <p>Checkpoints, watermarks, and Run ID deduplication prevent duplicate extraction and publication.</p>
+              <div class="module-meta"><span>Checkpoint store</span><strong>AT-LEAST-ONCE + DEDUPE</strong></div>
+            </section>
+            <section class="reliability-module" id="observabilityModule">
+              <div class="module-title"><span>O1</span><h4>Observability & Audit</h4><i></i></div>
+              <p>Structured logs, metrics, tracing, and audit trails; monitor SLA by product and channel.</p>
+              <div class="metric-row"><span><b id="metricRuns">128</b> RUNS</span><span><b id="metricFailures">0</b> FAILED</span><span><b>100%</b> AUDITED</span></div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="execution-strip">
+        <div class="run-identity">
+          <span>CURRENT RUN</span>
+          <strong id="runId">RUN-CUST-7F2A01</strong>
+          <small id="runSummary">DP-CUST-360 · API · attempt 1</small>
+        </div>
+        <div class="execution-timeline" aria-label="Execution stages">
+          <div class="timeline-step active" data-timeline="source"><i></i><span>Extract</span></div>
+          <div class="timeline-step" data-timeline="transform"><i></i><span>Validate</span></div>
+          <div class="timeline-step" data-timeline="landing"><i></i><span>Publish</span></div>
+          <div class="timeline-step" data-timeline="core"><i></i><span>Route</span></div>
+          <div class="timeline-step" data-timeline="complete"><i></i><span>Deliver</span></div>
+        </div>
+        <div class="event-console">
+          <span class="console-prompt">›</span>
+          <p id="eventMessage" aria-live="polite">Loading configuration snapshot…</p>
+          <time id="eventTime">00:00.0</time>
+        </div>
+      </div>
+    </section>
+
+    <section class="design-notes" aria-labelledby="designNotesTitle">
+      <div class="section-heading compact">
+        <div><p class="section-index">02 / ARCHITECTURE GUARDRAILS</p><h2 id="designNotesTitle">Key Architecture Guardrails</h2></div>
+        <p>Clear ownership, recoverable failures, and a single, complete file hand-off to downstream consumers.</p>
+      </div>
+      <div class="notes-grid">
+        <article><span>01</span><h3>Product-level isolation</h3><p>Each Data Product has independent SQL, channel, schedule, watermark, schema, and landing-folder configuration.</p></article>
+        <article><span>02</span><h3>Safe file hand-off</h3><p>Adapters publish only complete files and manifests. AIP Core scans folders containing _SUCCESS, preventing partial-file reads.</p></article>
+        <article><span>03</span><h3>Recoverable by design</h3><p>Retryable failures recover automatically. Non-retryable failures move to the DLQ with alerts and can be safely replayed using the original Run ID after remediation.</p></article>
+        <article><span>04</span><h3>Routing stays in AIP</h3><p>Adapters remain unaware of downstream routes. AIP Core uses its existing configuration for 1:N distribution, avoiding duplicate routing logic.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>INTEGRATION PLATFORM · SOLUTION ARCHITECTURE</span>
+    <p>Conceptual HLD — SQL statements, folders, and Data Product names are illustrative. Implementation is subject to actual interface contracts.</p>
+  </footer>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
